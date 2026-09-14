@@ -12,13 +12,13 @@ header{position:sticky;top:0;z-index:5;background:#0e1527;border-bottom:1px soli
 .hero{background:linear-gradient(135deg,#182744,#142f2e);border:1px solid #2c4961;border-radius:18px;padding:22px;margin:4px 0 16px}.hero h1{font-size:28px;margin:7px 0}.green{color:#43d39e}.red{color:#ff7184}.amber{color:#f4c95d}
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.card{background:#11182b;border:1px solid #26314b;border-radius:14px;padding:15px}.stat span{color:#8e9ab6}.stat b{font-size:25px;display:block;margin-top:4px}
 .panel{background:#11182b;border:1px solid #26314b;border-radius:14px;padding:15px;margin:14px 0}.filters{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}.filters label{color:#8e9ab6;font-size:12px}.filters input,.filters select{display:block;width:100%;margin-top:5px;padding:9px;background:#0b1020;color:#eef3ff;border:1px solid #26314b;border-radius:8px}
-.table{overflow:auto;border:1px solid #26314b;border-radius:12px;background:#11182b}table{width:100%;min-width:980px;border-collapse:collapse}th,td{padding:11px 12px;border-bottom:1px solid #202a40;text-align:left;white-space:nowrap}th{color:#7887a3;font-size:11px;text-transform:uppercase}tr:hover{background:#151f35}.badge{display:inline-block;padding:4px 7px;border-radius:99px;background:#16362e;color:#79e0b9;font-size:11px}.badge.amber{background:#332b17;color:#f4d77d}.note{font-size:12px;color:#7887a3;margin:18px 0}.hidden{display:none}
+.table{overflow:auto;border:1px solid #26314b;border-radius:12px;background:#11182b}table{width:100%;min-width:980px;border-collapse:collapse}th,td{padding:11px 12px;border-bottom:1px solid #202a40;text-align:left;white-space:nowrap}th{color:#7887a3;font-size:11px;text-transform:uppercase}tr:hover{background:#151f35}.badge{display:inline-block;padding:4px 7px;border-radius:99px;background:#16362e;color:#79e0b9;font-size:11px}.badge.amber{background:#332b17;color:#f4d77d}.searchbar{display:flex;gap:8px;margin-top:12px}.searchbar input{flex:1;padding:11px 12px;background:#0b1020;color:#eef3ff;border:1px solid #2b3852;border-radius:9px}.search-results{margin-top:10px}.search-item{padding:12px;border:1px solid #26314b;border-radius:10px;background:#11182b;margin-top:7px;cursor:pointer}.action{display:flex;gap:8px;flex-wrap:wrap}.note{font-size:12px;color:#7887a3;margin:18px 0}.hidden{display:none}
 @media(max-width:800px){.stats{grid-template-columns:repeat(2,1fr)}.filters{grid-template-columns:repeat(2,1fr)}.hero h1{font-size:24px}}
 @media(max-width:520px){header{padding:13px}.wrap{padding:0 14px}.stats{gap:8px}.filters{grid-template-columns:1fr}.card{padding:12px}}
 </style>
 </head>
 <body>
-<header><div class="wrap"><div class="brand">📡 Stock Radar</div><div class="muted">Indian stock discovery • Technical + Fundamental + MF/FII/DII</div></div></header>
+<header><div class="wrap"><div class="top"><div><div class="brand">📡 Stock Radar</div><div class="muted">Indian stock discovery • Technical + Fundamental + MF/FII/DII</div></div><button id="refreshBtn">↻ Refresh</button></div><div class="searchbar"><input id="search" placeholder="Search stock e.g. GRANULES, BEL, TITAN"><button class="primary" id="searchBtn">Search</button></div><div id="searchResults" class="search-results"></div></div></header>
 <main class="wrap">
 <div class="tabs">
 <button class="active" data-tab="all">Dashboard</button>
@@ -36,7 +36,7 @@ header{position:sticky;top:0;z-index:5;background:#0e1527;border-bottom:1px soli
 <div class="card stat"><span>Institutional Bullish</span><b id="inst">—</b></div>
 <div class="card stat"><span>High Conviction</span><b id="conviction">—</b></div>
 </div>
-<div class="panel"><h3>Top setups</h3><div class="muted">Ranked by combined technical + fundamental + institutional strength.</div></div>
+<div class="panel"><h3>Top setups</h3><div class="muted">Ranked by combined technical + fundamental + institutional strength.</div><div class="action" style="margin-top:12px"><button class="primary" onclick="showTop()">Show top bullish</button><button onclick="showEntryExit()">Entry & Exit rules</button></div></div>
 <div id="dashboardTable"></div>
 </section>
 
@@ -77,7 +77,7 @@ header{position:sticky;top:0;z-index:5;background:#0e1527;border-bottom:1px soli
 </section>
 
 <section id="risk" class="hidden">
-<div class="panel"><h2>🛡 Psychology & Risk</h2><div class="muted">Use the screener to find candidates; risk management decides whether to trade.</div></div>
+<div class="panel"><h2>🛡 Psychology & Risk</h2><div class="muted">Use the screener to find candidates; risk management decides whether to trade.</div></div><div class="panel"><h3>🎯 Entry & Exit</h3><div class="stats"><div class="card"><b>Entry</b><p class="muted">Breakout above resistance with volume, or a controlled retest that holds support.</p></div><div class="card"><b>Stop-loss</b><p class="muted">Place below setup invalidation or a suitable ATR/structure level.</p></div><div class="card"><b>Target / Exit</b><p class="muted">Use prior resistance, risk/reward and trailing structure. Exit when the trend thesis breaks.</p></div><div class="card"><b>No trade</b><p class="muted">Avoid chasing extended moves, weak volume, broken support or poor risk/reward.</p></div></div></div>
 <div class="stats">
 <div class="card"><b>Entry</b><p class="muted">Prefer confirmed breakouts or controlled retests rather than chasing extended candles.</p></div>
 <div class="card"><b>Stop-loss</b><p class="muted">Define invalidation from structure or ATR before entering.</p></div>
@@ -109,6 +109,10 @@ function pct(v){return (v>0?"+":"")+v.toFixed(1)+"%"}
 function table(a){let h='<div class="table"><table><thead><tr><th>Stock</th><th>Price</th><th>Setup</th><th>RSI</th><th>Vol</th><th>Technical</th><th>MF</th><th>FII/FPI</th><th>DII</th><th>Inst.</th><th>Overall</th></tr></thead><tbody>';
 a.forEach(x=>h+=`<tr><td><b>${x[0]}</b></td><td>₹${x[1].toLocaleString("en-IN")}</td><td><span class="badge ${x[2]==="Reversal"?"amber":""}">${x[2]}</span></td><td>${x[3]}</td><td>${x[4]}×</td><td>${x[5]}</td><td class="${x[11]>=0?"green":"red"}">${pct(x[11])}</td><td class="${x[12]>=0?"green":"red"}">${pct(x[12])}</td><td class="${x[13]>=0?"green":"red"}">${pct(x[13])}</td><td>${inst(x)}/50</td><td><b>${overall(x)}</b></td></tr>`);
 return h+"</tbody></table></div>"}
+function showTop(){document.querySelectorAll(".tabs button").forEach(x=>x.classList.remove("active"));document.querySelector("[data-tab=all]").classList.add("active");["all","technical","institutional","fundamental","risk"].forEach(x=>$(x).classList.toggle("hidden",x!=="all"));renderAll()}
+function showEntryExit(){document.querySelector("[data-tab=risk]").click();window.scrollTo({top:0,behavior:"smooth"})}
+function searchStock(){let q=$("search").value.trim().toUpperCase();if(!q){$("searchResults").innerHTML="";return}let a=S.filter(x=>x[0].includes(q));$("searchResults").innerHTML=a.length?a.map(x=>`<div class="search-item" onclick="openStock('${x[0]}')"><b>${x[0]}</b> · ₹${x[1].toLocaleString("en-IN")} · ${x[2]} · Overall ${overall(x)}</div>`).join(""):"<div class=\"search-item muted\">No stock found in the current dataset.</div>"}
+function openStock(t){let x=S.find(y=>y[0]===t);if(!x)return;$("searchResults").innerHTML=`<div class="panel"><h2>${x[0]}</h2><div class="muted">₹${x[1].toLocaleString("en-IN")} · ${x[2]}</div><div class="grid"><div class="card"><span class="muted">RSI</span><br><b>${x[3]}</b></div><div class="card"><span class="muted">Volume</span><br><b>${x[4]}×</b></div><div class="card"><span class="muted">Technical</span><br><b>${x[5]}/100</b></div><div class="card"><span class="muted">Overall</span><br><b>${overall(x)}/100</b></div></div><div class="muted">MF ${x[11]>=0?"↑":"↓"} ${pct(x[11])} · FII/FPI ${x[12]>=0?"↑":"↓"} ${pct(x[12])} · DII ${x[13]>=0?"↑":"↓"} ${pct(x[13])}</div><hr style="border-color:#26314b;margin:15px 0"><h3>Entry & Exit</h3><p>Entry: wait for confirmation of the ${x[2].toLowerCase()} setup and volume support.</p><p>Stop-loss: below the setup invalidation/support level.</p><p>Exit: reduce/exit if the setup fails, support breaks or the predefined target/risk-reward is reached.</p></div>`;window.scrollTo({top:0,behavior:"smooth"})}
 function renderAll(){let a=[...S].sort((a,b)=>overall(b)-overall(a));$("breakouts").textContent=S.filter(x=>x[2]==="Breakout"&&x[5]>=80).length;$("stage2").textContent=S.filter(x=>x[14]).length;$("inst").textContent=S.filter(x=>x[11]>0&&x[12]>0&&x[13]>0&&x[5]>=70).length;$("conviction").textContent=S.filter(x=>overall(x)>=80).length;$("dashboardTable").innerHTML=table(a)}
 function renderTechnical(){let setup=$("setup").value,a=S.filter(x=>(setup==="all"||x[2]===setup)&&x[3]>=+$("rmin").value&&x[3]<=+$("rmax").value&&x[4]>=+$("vmin").value&&x[5]>=+$("tmin").value);$("technicalTable").innerHTML=table(a)}
 function ok(v,mode){return mode==="Any"||(mode==="Increasing"?v>0:v<0)}
@@ -118,6 +122,6 @@ document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{document.que
 ["setup","rmin","rmax","vmin","tmin"].forEach(id=>$(id).addEventListener("input",renderTechnical));
 ["mf","fii","dii","imin","bull"].forEach(id=>$(id).addEventListener("input",renderInst));
 ["sales","profit","roce","debt","prom"].forEach(id=>$(id).addEventListener("input",renderFund));
-renderAll();
+$("refreshBtn").onclick=()=>{location.reload()};$("searchBtn").onclick=searchStock;$("search").addEventListener("keydown",e=>{if(e.key==="Enter")searchStock()});renderAll();
 </script>
 </body></html>
